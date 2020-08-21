@@ -7,7 +7,7 @@
 * No Dependencies
 * Intuitive Interfaces
 * Consistent Writers
-    - FileWriter, *rotating & robust*
+    - FileWriter, *rotating & effective*
     - ConsoleWriter, *colorful & templating*
     - MultiWriter, *multiple level dispatch*
     - AsyncWriter, *asynchronously writing*
@@ -279,14 +279,17 @@ log.Error().Int("number", 42).Str("foo", "bar").Msg("a error log")
 To log to file asynchronously for maximize performance, use `AsyncWriter`.
 
 ```go
-file, _ := os.OpenFile("main.log", os.O_WRONLY, 0644)
 log.DefaultLogger.Writer = &log.AsyncWriter{
-	Writer: file,
+	BufferSize:   32 * 1024,
+	ChannelSize:  100,
+	SyncDuration: 5 * time.Second,
+	Writer:       &log.FileWriter{Filename: "main.log"},
 }
 log.Info().Int("number", 42).Str("foo", "bar").Msg("a async info log")
 log.Warn().Int("number", 42).Str("foo", "bar").Msg("a async warn log")
 log.DefaultLogger.Writer.(io.Closer).Close()
 ```
+
 To log to linux systemd journald, using `JournalWriter`.
 
 ```go
